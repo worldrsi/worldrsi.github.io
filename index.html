@@ -1,35 +1,414 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>WorldRSI | Robots That Build Worlds to Improve Themselves</title>
-  <meta name="description" content="WorldRSI: Robots That Build Worlds to Improve Themselves. Paper and code coming soon.">
-  <link rel="canonical" href="https://worldrsi.github.io/">
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <style>
-    :root { --fg: #111827; --muted: #6b7280; --line: #e5e7eb; --bg: #ffffff; }
-    @media (prefers-color-scheme: dark) { :root { --fg: #f3f4f6; --muted: #9ca3af; --line: #374151; --bg: #0b0f17; } }
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--fg); padding: 24px 16px 48px;
-           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-           display: flex; flex-direction: column; }
-    .site-header { width: 100%; max-width: 840px; margin: 0 auto; }
-    .brand { color: var(--fg); font-size: 1.1rem; font-weight: 700; text-decoration: none; letter-spacing: -0.02em; }
-    main { flex: 1; display: grid; place-items: center; text-align: center; padding: 48px 0; }
-    h1 { font-size: clamp(1.75rem, 4.1vw, 2.5rem); line-height: 1.15; margin: 0 0 12px; letter-spacing: -0.02em; }
-    .subtitle { font-size: clamp(1.1rem, 3vw, 1.4rem); font-weight: 500; margin: 0 0 28px; color: var(--muted); line-height: 1.4; }
-    .soon { display: inline-block; border: 1px solid var(--line); border-radius: 8px; padding: 10px 18px; color: var(--muted); }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WorldRSI | Robot Agents That Build Worlds to Improve Themselves</title>
+<meta name="description" content="WorldRSI: from the first frames of a new task, a robot agent builds its own simulation of the scene, rehearses there, and returns to reality with a harness and skills. Results on 640 held-out LIBERO-MAX, LIBERO-PRO and LIBERO-Plus scenes and on a physical bimanual robot.">
+<link rel="canonical" href="https://worldrsi.github.io/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="WorldRSI: Robot Agents That Build Worlds to Improve Themselves">
+<meta property="og:description" content="A robot agent builds its own world from the first frames, rehearses there, and acts live with what it learned.">
+<meta property="og:image" content="https://worldrsi.github.io/assets/img/teaser_live.jpg">
+<style>
+  :root {
+    --bg: #fbfaf7; --surface: #ffffff; --fg: #1d1d1b; --muted: #64625c; --line: #e4e1d8;
+    --real: #2156a5; --sim: #1b7837; --rsi: #b0701f; --accent: #2156a5;
+    --good: #1b7837; --bad: #a33a2a; --chip: #f1eee6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12130f; --surface: #1a1b17; --fg: #ecebe6; --muted: #a29f96; --line: #2f302a;
+      --real: #7aa7ea; --sim: #6cc28a; --rsi: #e0a65a; --accent: #7aa7ea;
+      --good: #6cc28a; --bad: #e58b78; --chip: #24251f;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--fg); line-height: 1.6;
+         font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif; font-size: 18px; }
+  .sans, h2, h3, nav, table, .chip, .btn, figcaption, .label, .task-meta, .kicker, summary {
+         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif; }
+  a { color: var(--accent); }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+  header.hero { padding: 64px 20px 28px; text-align: center; }
+  .kicker { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  h1 { font-size: clamp(2rem, 5vw, 3.1rem); line-height: 1.12; margin: 0 auto 18px; max-width: 900px; letter-spacing: -0.01em; font-weight: 600; }
+  h1 .w { color: var(--accent); }
+  .authors { font-size: 18px; margin: 0 0 4px; }
+  .authors sup, .affil sup { font-size: 11px; }
+  .affil { color: var(--muted); font-size: 15px; margin: 0 0 22px; }
+  .btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 999px; border: 1px solid var(--line);
+         background: var(--surface); color: var(--fg); text-decoration: none; font-size: 14px; font-weight: 500; }
+  .btn.soon { color: var(--muted); }
+  nav.toc { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent);
+            backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  nav.toc .wrap { display: flex; gap: 22px; overflow-x: auto; padding-top: 10px; padding-bottom: 10px; white-space: nowrap; }
+  nav.toc a { color: var(--muted); text-decoration: none; font-size: 14px; }
+  nav.toc a:hover { color: var(--fg); }
+  section { padding: 52px 0 8px; }
+  h2 { font-size: 26px; margin: 0 0 6px; letter-spacing: -0.01em; font-weight: 650; }
+  h2 + .lead { margin-top: 0; }
+  h3 { font-size: 18px; margin: 30px 0 8px; font-weight: 650; }
+  .lead { color: var(--muted); font-size: 18px; max-width: 820px; }
+  p { max-width: 820px; }
+
+  /* teaser */
+  .teaser { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 10px; align-items: center; margin: 34px 0 8px; }
+  .teaser figure { margin: 0; }
+  .teaser img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 10px; display: block; border: 2px solid var(--line); }
+  .teaser .r img { border-color: var(--real); } .teaser .s img { border-color: var(--sim); }
+  .label { font-size: 13px; font-weight: 650; margin: 0 0 6px; }
+  .label.r { color: var(--real); } .label.s { color: var(--sim); }
+  .arrow { font-family: -apple-system, sans-serif; font-size: 12px; color: var(--muted); text-align: center; line-height: 1.2; }
+  .arrow b { display: block; font-size: 22px; color: var(--fg); font-weight: 400; }
+  .meta-bar { margin: 12px auto 0; max-width: 680px; border: 1.5px solid var(--rsi); border-radius: 10px; padding: 8px 14px;
+              text-align: center; font-family: -apple-system, sans-serif; font-size: 14px; color: var(--muted); }
+  .meta-bar b { color: var(--rsi); }
+  .caption { color: var(--muted); font-size: 15px; text-align: center; max-width: 860px; margin: 12px auto 0; }
+
+  /* stats */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 26px 0 0; }
+  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 16px 14px; }
+  .stat .n { font-family: -apple-system, sans-serif; font-size: 30px; font-weight: 700; line-height: 1.1; }
+  .stat .n small { font-size: 15px; font-weight: 500; color: var(--muted); }
+  .stat .t { font-family: -apple-system, sans-serif; font-size: 13px; color: var(--muted); margin-top: 4px; line-height: 1.35; }
+
+  /* steps */
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 22px; }
+  .step { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; font-size: 16px; line-height: 1.5; }
+  .step .tag { font-family: -apple-system, sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+  .step h3 { margin: 4px 0 6px; font-size: 17px; }
+  .step.real .tag { color: var(--real); } .step.sim .tag { color: var(--sim); } .step.rsi .tag { color: var(--rsi); }
+  .step p { margin: 0; color: var(--muted); }
+
+  /* tables */
+  .tbl { overflow-x: auto; margin: 14px 0 6px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+  th, td { padding: 9px 12px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  thead th { font-weight: 600; color: var(--muted); font-size: 13px; background: var(--chip); }
+  tbody tr:last-child td { border-bottom: none; }
+  td.best { font-weight: 700; }
+  td.dim, th.dim { color: var(--muted); }
+  tr.group td { background: var(--chip); font-weight: 600; font-size: 13px; color: var(--muted); }
+  .note { font-family: -apple-system, sans-serif; font-size: 13.5px; color: var(--muted); max-width: 900px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* tasks */
+  .tasks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 18px; }
+  .task { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .task .pair { display: grid; grid-template-columns: 1fr 1fr; }
+  .task .pair img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; }
+  .task .body { padding: 12px 14px 14px; }
+  .task h3 { margin: 0 0 4px; font-size: 16px; }
+  .task p { margin: 0 0 10px; font-size: 14.5px; color: var(--muted); line-height: 1.45; }
+  .task-meta { display: flex; gap: 6px; flex-wrap: wrap; font-size: 12.5px; }
+  .chip { display: inline-block; padding: 3px 9px; border-radius: 999px; background: var(--chip); color: var(--muted); font-size: 12.5px; }
+  .chip.ok { color: var(--good); font-weight: 600; } .chip.wip { color: var(--rsi); font-weight: 600; }
+  .pairlbl { display: grid; grid-template-columns: 1fr 1fr; font-family: -apple-system, sans-serif; font-size: 11.5px; font-weight: 600; }
+  .pairlbl span { padding: 4px 8px; } .pairlbl .r { color: var(--real); } .pairlbl .s { color: var(--sim); }
+
+  /* videos */
+  .vids { display: grid; grid-template-columns: 1fr; gap: 18px; margin-top: 18px; }
+  .vid { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .vid video { width: 100%; display: block; background: #000; }
+  .vid .cap { padding: 10px 14px 12px; font-family: -apple-system, sans-serif; font-size: 14px; color: var(--muted); }
+  .vid .cap b { color: var(--fg); }
+  .vids.two-col { grid-template-columns: 1fr 1fr; }
+
+  figure.wide { margin: 18px 0 0; }
+  figure.wide img { width: 100%; border-radius: 10px; border: 1px solid var(--line); display: block; }
+  figure.wide figcaption { font-size: 14px; color: var(--muted); margin-top: 6px; }
+
+  details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin: 12px 0; }
+  summary { cursor: pointer; font-weight: 600; font-size: 16px; }
+  details[open] summary { margin-bottom: 8px; }
+  details p, details li { font-size: 16px; }
+  pre { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; overflow-x: auto;
+        font-size: 13.5px; line-height: 1.5; }
+  footer { padding: 48px 0 60px; color: var(--muted); font-size: 14px; text-align: center; font-family: -apple-system, sans-serif; }
+
+  @media (max-width: 860px) {
+    body { font-size: 17px; }
+    .teaser { grid-template-columns: 1fr; }
+    .teaser .arrow b { transform: rotate(90deg); display: inline-block; }
+    .stats, .steps { grid-template-columns: 1fr 1fr; }
+    .tasks, .two, .vids.two-col { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) { .stats, .steps { grid-template-columns: 1fr; } }
+</style>
 </head>
 <body>
-  <header class="site-header"><a class="brand" href="./">WorldRSI</a></header>
-  <main>
-    <section>
-      <h1>WorldRSI</h1>
-      <p class="subtitle">Robots That Build Worlds to Improve Themselves</p>
-      <span class="soon">Paper and code coming soon</span>
-    </section>
-  </main>
+
+<header class="hero wrap">
+  <p class="kicker">Agentic robotics · Real2Sim2Real · Recursive self-improvement</p>
+  <h1><span class="w">WorldRSI</span>: Robot Agents That Build Worlds to Improve Themselves</h1>
+  <p class="authors">Yunbei Zhang<sup>1</sup> &nbsp; Yijiang Li<sup>2</sup> &nbsp; Janet Wang<sup>1</sup> &nbsp; Jihun Hamm<sup>1</sup> &nbsp; Nuno Vasconcelos<sup>2</sup></p>
+  <p class="affil"><sup>1</sup>Tulane University &nbsp;&nbsp; <sup>2</sup>University of California, San Diego</p>
+  <div class="btns">
+    <a class="btn" href="#robot">Real-robot videos</a>
+    <a class="btn" href="#results">Benchmark results</a>
+    <span class="btn soon">Paper and code: coming soon</span>
+  </div>
+
+  <div class="teaser">
+    <figure class="r"><p class="label r">Real: first frame</p><img src="assets/img/teaser_real.jpg" alt="The real bimanual station at the start of the task: a power strip and a charger on the table."></figure>
+    <div class="arrow"><b>→</b>build</div>
+    <figure class="s"><p class="label s">Sim: the agent's own world</p><img src="assets/img/teaser_world.jpg" alt="The agent's own simulation of the same scene, rendered from the same camera."></figure>
+    <div class="arrow"><b>→</b>harness<br>+ skills</div>
+    <figure class="r"><p class="label r">Real: act live</p><img src="assets/img/teaser_live.jpg" alt="On the physical robot, the live agent plugs the charger into the power strip (overview and wrist cameras)."></figure>
+  </div>
+  <div class="meta-bar"><b>Meta harness</b> (WorldRSI-Meta): evolved beforehand from the records of past episodes, then adapted in each new world</div>
+  <p class="caption">From the first real frame, the agent builds its own world of the scene, rehearses the task there, and hands a harness and
+  skills, not a policy, to a live agent on the real robot. Shown: plugging a charger into a power strip on a physical bimanual robot.</p>
+</header>
+
+<nav class="toc"><div class="wrap">
+  <a href="#idea">Idea</a><a href="#method">Method</a><a href="#robot">Real robot</a><a href="#results">Benchmarks</a>
+  <a href="#showharness">vs. Show-Harness</a><a href="#details">Details</a><a href="#cite">Citation</a>
+</div></nav>
+
+<main class="wrap">
+
+<section id="idea">
+  <h2>The idea</h2>
+  <p class="lead">Robots that act with foundation-model agents still fail when a new scene differs from what the agent expects. A plan made
+  once from the first camera frames breaks when an object is not where it seemed, a grasp slips, or the scene changes during
+  execution.</p>
+  <p>WorldRSI gives the agent a safe place to try things before acting. At the start of every new task the agent builds its own
+  world of the scene, rehearses in it, and returns to reality with knowledge rather than a fixed policy. Across tasks, the way it
+  rehearses improves itself: a meta harness, evolved from the records of past episodes, gives every new rehearsal a better start.</p>
+  <div class="stats">
+    <div class="stat"><div class="n">63 → 80<small>%</small></div><div class="t">Claude Opus 5.5 on 640 held-out scenes: a program written once vs. WorldRSI</div></div>
+    <div class="stat"><div class="n">84<small>%</small></div><div class="t">with the self-improved meta harness (WorldRSI-Meta)</div></div>
+    <div class="stat"><div class="n">32 / 34</div><div class="t">rehearsals succeed on hidden twins of six real-robot tasks</div></div>
+    <div class="stat"><div class="n">3 tasks</div><div class="t">already completed on the physical robot; the other three are under way</div></div>
+  </div>
+</section>
+
+<section id="method">
+  <h2>Method</h2>
+  <div class="steps">
+    <div class="step real"><span class="tag">Real → Sim</span><h3>Build a world</h3><p>From the instruction and the first frames only, the agent reconstructs the scene as an executable physics simulation: objects, fixtures, the calibrated robot, and a check of what success means. It renders its world from the robot's cameras and corrects it until it agrees with the real frames.</p></div>
+    <div class="step sim"><span class="tag">In Sim</span><h3>Rehearse</h3><p>It practices the task in its world and in shifted and changing copies of it (objects displaced, the target moved during the approach, light or sensor noise). It writes down what it learned as a harness (phases, checks, repairs) and a library of skills it tested.</p></div>
+    <div class="step real"><span class="tag">Sim → Real</span><h3>Act live</h3><p>A new agent session acts on the real scene with only the harness and the skills: one short script at a time, looking at the cameras after each, so it can re-measure and recover. The world shapes how the agent acts; it need not match reality exactly.</p></div>
+    <div class="step rsi"><span class="tag">RSI</span><h3>Improve the harness</h3><p>A proposer agent reads the records of earlier episodes and writes a new version of the harness; another model removes anything tied to one scene; a version is kept only if it does better on scenes it was not built from.</p></div>
+  </div>
+</section>
+
+<section id="robot">
+  <h2>On a physical robot</h2>
+  <p class="lead">A bimanual station with two 6-DoF arms and three RGB cameras (an overview camera and one on each wrist), no depth.
+  Six tasks follow recordings made on the station. Each world is built from a recording's first frames only.</p>
+
+  <h3>Real episodes</h3>
+  <p class="note">The live agent is GPT-6 Astra, running at half speed with the harness and skills from its rehearsal. Each video shows the
+  three cameras, condensed from the full episode.</p>
+  <div class="vids">
+    <div class="vid"><video controls muted playsinline preload="metadata" poster="assets/video/real_plug_charger.jpg"><source src="assets/video/real_plug_charger.mp4" type="video/mp4"></video>
+      <div class="cap"><b>Plug in a charger.</b> Turn the power strip, pick up the charger, insert its prongs fully, let go, and return home. Success; 24 minutes, 56 scripts.</div></div>
+    <div class="vid"><video controls muted playsinline preload="metadata" poster="assets/video/real_cover_blocks.jpg"><source src="assets/video/real_cover_blocks.mp4" type="video/mp4"></video>
+      <div class="cap"><b>Cover and uncover blocks.</b> Cover three blocks with upside-down cups from left to right, then uncover them in a given color order, and return home. Success; 11.5 minutes, 18 scripts.</div></div>
+    <div class="vid"><video controls muted playsinline preload="metadata" poster="assets/video/real_press_number.jpg"><source src="assets/video/real_press_number.mp4" type="video/mp4"></video>
+      <div class="cap"><b>Press buttons by number.</b> Press each button as many times as its card shows, then the confirm button after each, and return home. Success; 15 minutes, 36 scripts.</div></div>
+  </div>
+  <p class="note">So far, three of the first eight trials have succeeded, one on each of these tasks. The others were stopped by the operator
+  or by the station: pauses, motor heat, and a first hang-mugs attempt in which the mug rack, much taller than the agent's world
+  assumed, kept being pushed around. Trials of the remaining tasks are under way.</p>
+
+  <h3>Six tasks: the real first frame and the agent's world</h3>
+  <div class="tasks">
+    <div class="task"><div class="pairlbl"><span class="r">Real first frame</span><span class="s">Agent's world</span></div>
+      <div class="pair"><img src="assets/img/tasks/plug_charger_real.jpg" alt="Real: charger and power strip"><img src="assets/img/tasks/plug_charger_world.jpg" alt="Agent's world: charger and power strip"></div>
+      <div class="body"><h3>Plug in a charger</h3><p>Plug the charger into the power strip, prongs fully in.</p>
+      <div class="task-meta"><span class="chip">twin 5/6</span><span class="chip ok">real ✓</span></div></div></div>
+    <div class="task"><div class="pairlbl"><span class="r">Real first frame</span><span class="s">Agent's world</span></div>
+      <div class="pair"><img src="assets/img/tasks/cover_blocks_real.jpg" alt="Real: blocks and cups"><img src="assets/img/tasks/cover_blocks_world.jpg" alt="Agent's world: blocks and cups"></div>
+      <div class="body"><h3>Cover and uncover blocks</h3><p>Cover three blocks with cups, then uncover them in a given order.</p>
+      <div class="task-meta"><span class="chip">twin 4/4</span><span class="chip ok">real ✓</span></div></div></div>
+    <div class="task"><div class="pairlbl"><span class="r">Real first frame</span><span class="s">Agent's world</span></div>
+      <div class="pair"><img src="assets/img/tasks/press_number_real.jpg" alt="Real: buttons and number cards"><img src="assets/img/tasks/press_number_world.jpg" alt="Agent's world: buttons"></div>
+      <div class="body"><h3>Press buttons by number</h3><p>Press each carded button as many times as its card shows.</p>
+      <div class="task-meta"><span class="chip">twin 6/6</span><span class="chip ok">real ✓</span></div></div></div>
+    <div class="task"><div class="pairlbl"><span class="r">Real first frame</span><span class="s">Agent's world</span></div>
+      <div class="pair"><img src="assets/img/tasks/hang_mugs_real.jpg" alt="Real: mugs and a mug rack"><img src="assets/img/tasks/hang_mugs_world.jpg" alt="Agent's world: mugs and a rack"></div>
+      <div class="body"><h3>Hang mugs</h3><p>Hang both mugs on the rack by their handles.</p>
+      <div class="task-meta"><span class="chip">twin 4/4</span><span class="chip wip">real: first try failed</span></div></div></div>
+    <div class="task"><div class="pairlbl"><span class="r">Real first frame</span><span class="s">Agent's world</span></div>
+      <div class="pair"><img src="assets/img/tasks/pack_toys_real.jpg" alt="Real: a box and four objects"><img src="assets/img/tasks/pack_toys_world.jpg" alt="Agent's world: a box and four objects"></div>
+      <div class="body"><h3>Pack objects</h3><p>Put four objects into the box, front ends pointing left.</p>
+      <div class="task-meta"><span class="chip">twin 5/6</span><span class="chip wip">real: under way</span></div></div></div>
+    <div class="task"><div class="pairlbl"><span class="r">Real first frame</span><span class="s">Agent's world</span></div>
+      <div class="pair"><img src="assets/img/tasks/hanoi_real.jpg" alt="Real: a board with five pegs and three stacked pieces"><img src="assets/img/tasks/hanoi_world.jpg" alt="Agent's world: the board and pieces"></div>
+      <div class="body"><h3>Tower of Hanoi</h3><p>Move the three-piece stack to the left-end peg, never larger on smaller.</p>
+      <div class="task-meta"><span class="chip">twin 8/8</span><span class="chip wip">real: under way</span></div></div></div>
+  </div>
+  <p class="note">"Twin": rehearsals of the hand-over by a live agent on a hidden simulated twin of the recorded scene, built by us and never
+  seen by the rehearsing agent (32 of 34 succeed).</p>
+
+  <h3>Rehearsal on a hidden twin</h3>
+  <div class="vids two-col">
+    <div class="vid"><video controls muted playsinline preload="metadata" poster="assets/video/twin_plug_charger.jpg"><source src="assets/video/twin_plug_charger.mp4" type="video/mp4"></video>
+      <div class="cap"><b>Plug in a charger</b>, twin.</div></div>
+    <div class="vid"><video controls muted playsinline preload="metadata" poster="assets/video/twin_cover_blocks.jpg"><source src="assets/video/twin_cover_blocks.mp4" type="video/mp4"></video>
+      <div class="cap"><b>Cover and uncover blocks</b>, twin.</div></div>
+  </div>
+</section>
+
+<section id="results">
+  <h2>Held-out benchmark results</h2>
+  <p class="lead">Three robustness benchmarks built on LIBERO, where the benchmark's simulator stands in for reality and the agent sees
+  only camera frames. 640 held-out scenes, fixed before any method ran on them; one attempt per scene.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Benchmark</th><th>Held-out scenes</th><th>Show-Harness<sup>†</sup></th><th>Direct</th><th>WorldRSI</th><th>WorldRSI-Meta</th></tr></thead>
+    <tbody>
+      <tr><td>LIBERO-MAX (changes during execution)</td><td>200</td><td class="dim">2.0</td><td>50.8</td><td>78.5</td><td class="best">84.5</td></tr>
+      <tr><td>LIBERO-PRO</td><td>160</td><td class="dim">4.4</td><td>67.5</td><td>78.8</td><td class="best">83.1</td></tr>
+      <tr><td>LIBERO-Plus</td><td>280</td><td class="dim">2.1</td><td>70.0</td><td>81.1</td><td class="best">83.2</td></tr>
+      <tr><td>All</td><td>640</td><td class="dim">2.7</td><td>63.4</td><td>79.7</td><td class="best">83.6</td></tr>
+    </tbody></table></div>
+  <p class="note">Success (%), Claude Opus 5.5. Direct: a program written once from the first frames. <sup>†</sup>Show-Harness with the same
+  model and up to 985 simulator steps; within the budget of the other methods it succeeds in 1 of 640 scenes. Scene by scene (exact McNemar):
+  WorldRSI vs. Direct +137/−33 (p&nbsp;&lt;&nbsp;10<sup>−15</sup>); WorldRSI-Meta vs. WorldRSI +60/−35 (p&nbsp;=&nbsp;0.013).</p>
+
+  <h3>Where the gains come from</h3>
+  <div class="two">
+    <div class="tbl"><table>
+      <thead><tr><th>LIBERO-MAX event</th><th>n</th><th>Direct</th><th>WorldRSI</th><th>Meta</th></tr></thead>
+      <tbody>
+        <tr><td>target moved</td><td>26</td><td>4</td><td>58</td><td>54</td></tr>
+        <tr><td>receptacle moved</td><td>26</td><td>12</td><td>69</td><td>73</td></tr>
+        <tr><td>obstacle inserted</td><td>26</td><td>58</td><td>69</td><td>85</td></tr>
+        <tr><td>camera shift</td><td>26</td><td>65</td><td>92</td><td>96</td></tr>
+        <tr><td>sensor noise starts</td><td>24</td><td>61</td><td>79</td><td>92</td></tr>
+        <tr><td>light switch</td><td>24</td><td>79</td><td>96</td><td>100</td></tr>
+        <tr><td>visual theme switch</td><td>24</td><td>62</td><td>79</td><td>88</td></tr>
+        <tr><td>distractors appear</td><td>24</td><td>71</td><td>88</td><td>92</td></tr>
+      </tbody></table></div>
+    <div class="tbl"><table>
+      <thead><tr><th>Perturbation</th><th>n</th><th>Direct</th><th>WorldRSI</th><th>Meta</th></tr></thead>
+      <tbody>
+        <tr class="group"><td colspan="5">LIBERO-PRO</td></tr>
+        <tr><td>instruction reworded</td><td>40</td><td>68</td><td>80</td><td>90</td></tr>
+        <tr><td>objects changed</td><td>40</td><td>58</td><td>70</td><td>70</td></tr>
+        <tr><td>positions swapped</td><td>40</td><td>75</td><td>80</td><td>88</td></tr>
+        <tr><td>task changed</td><td>40</td><td>70</td><td>85</td><td>85</td></tr>
+        <tr class="group"><td colspan="5">LIBERO-Plus</td></tr>
+        <tr><td>object layout</td><td>40</td><td>63</td><td>78</td><td>80</td></tr>
+        <tr><td>camera viewpoint</td><td>40</td><td>80</td><td>83</td><td>85</td></tr>
+        <tr><td>robot initial state</td><td>40</td><td>68</td><td>83</td><td>83</td></tr>
+        <tr><td>language</td><td>40</td><td>78</td><td>85</td><td>80</td></tr>
+        <tr><td>lighting</td><td>40</td><td>73</td><td>85</td><td>90</td></tr>
+        <tr><td>background texture</td><td>40</td><td>75</td><td>83</td><td>85</td></tr>
+        <tr><td>sensor noise</td><td>40</td><td>55</td><td>73</td><td>80</td></tr>
+      </tbody></table></div>
+  </div>
+  <p class="note">Success (%), Claude Opus 5.5. When the target or the receptacle is moved during execution, a program written once almost
+  always fails; rehearsing in a world that includes such changes recovers most of these scenes.</p>
+
+  <h3>Other models and more scenes</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Model</th><th>Held-out set</th><th>Scenes</th><th>Direct</th><th>WorldRSI</th><th>WorldRSI-Meta</th></tr></thead>
+    <tbody>
+      <tr><td>GPT-6 Astra</td><td>LIBERO-MAX</td><td>100</td><td>37.0</td><td>75.0</td><td class="best">78.0</td></tr>
+      <tr><td>GPT-6 Astra</td><td>LIBERO-PRO</td><td>160</td><td>56.0</td><td>79.7</td><td class="best">84.2</td></tr>
+      <tr><td>Gemini 4 Argon</td><td>LIBERO-MAX</td><td>100</td><td>56.0</td><td class="best">78.8</td><td class="dim">–</td></tr>
+      <tr><td>Claude Opus 5.5, two rounds of held-out scenes</td><td>all three</td><td>1,578</td><td>60.8</td><td>79.5</td><td class="best">82.4</td></tr>
+    </tbody></table></div>
+  <p class="note">The meta harness was evolved with Claude Opus 5.5 and transfers to GPT-6 Astra unchanged. Rehearsal removes most of the gap
+  between models: Astra's Direct is about 10 points below Opus's, while their WorldRSI results do not differ significantly. The second round
+  adds the remaining 500 LIBERO-MAX Lite cases and 440 more LIBERO-PRO and LIBERO-Plus scenes, fixed the same way.</p>
+</section>
+
+<section id="showharness">
+  <h2>Comparison with a zero-shot VLM harness</h2>
+  <p class="lead">Show-Harness lets a VLM drive the robot zero-shot with 2–4&nbsp;cm action units, subtask planning and failure recovery.
+  We run its released code, prompts and default zero-shot plugins on the same scenes, robot interface and success check.</p>
+  <div class="tbl"><table>
+    <thead>
+      <tr><th></th><th></th><th></th><th></th><th></th><th colspan="3" style="text-align:center">Show-Harness</th></tr>
+      <tr><th>Model</th><th>Held-out set</th><th>Scenes</th><th>Direct</th><th>WorldRSI</th><th>same budget</th><th>≤985 steps</th><th>50 action steps</th></tr></thead>
+    <tbody>
+      <tr><td>Claude Opus 5.5</td><td>LIBERO-MAX</td><td>200</td><td>50.8</td><td class="best">78.5</td><td class="dim">0.0</td><td class="dim">2.0</td><td class="dim">1.0*</td></tr>
+      <tr><td></td><td>LIBERO-PRO</td><td>160</td><td>67.5</td><td class="best">78.8</td><td class="dim">0.0</td><td class="dim">4.4</td><td class="dim">1.2</td></tr>
+      <tr><td></td><td>LIBERO-Plus</td><td>280</td><td>70.0</td><td class="best">81.1</td><td class="dim">0.4</td><td class="dim">2.1</td><td class="dim">–</td></tr>
+      <tr><td>GPT-6 Astra</td><td>LIBERO-MAX*</td><td>100</td><td>37.0</td><td class="best">75.0</td><td class="dim">0.0</td><td class="dim">2.0</td><td class="dim">2.0</td></tr>
+      <tr><td></td><td>LIBERO-PRO</td><td>160</td><td>56.0</td><td class="best">79.7</td><td class="dim">0.6</td><td class="dim">3.8</td><td class="dim">1.9</td></tr>
+      <tr><td>Gemini 4 Argon</td><td>LIBERO-MAX*</td><td>100</td><td>56.0</td><td class="best">78.8</td><td class="dim">5.0</td><td class="dim">23.0</td><td class="dim">21.0</td></tr>
+      <tr><td></td><td>LIBERO-PRO</td><td>160</td><td class="best">75.0</td><td class="dim">–</td><td class="dim">4.4</td><td class="dim">26.9</td><td class="dim">17.5</td></tr>
+    </tbody></table></div>
+  <p class="note">Success (%). *The first 100 LIBERO-MAX scenes. "50 action steps" is the episode length of Show-Harness's own real-robot
+  evaluation, here with up to 5,000 simulator steps. Scene by scene, WorldRSI beats its 50-step episodes +202/−0 with Opus and +197/−1 with Astra.</p>
+  <details><summary>How Show-Harness was set up, and why it fails here</summary>
+    <ul>
+      <li><b>Views.</b> We orient both cameras so that the directions in its prompts hold on screen: on the overview camera a forward move goes
+      down the image and a right move to the right; on the wrist view, with the fingertips at the top, a forward move brings what is at the
+      bottom toward the fingers. We verified this by moving the arm and measuring the image motion; the camera setting shipped with its LIBERO
+      interface is mirrored left-right against these directions.</li>
+      <li><b>Calibration</b>, as on its real robots: the safety floor is the table height and the empty-grasp width is that of LIBERO's gripper.</li>
+      <li><b>Unchanged:</b> its runner, interpreter, prompts and default zero-shot plugins (subtask planning, proprioception, recovery, adaptive
+      step, action chunks, action history). Two hardware-only plugins are off: setpoint smoothing and a human keyboard override.</li>
+      <li><b>Models.</b> Claude Opus 5.5 and GPT-6 Astra receive the same requests through Amazon Bedrock (both reject a temperature there);
+      Gemini 4 Argon, its default model family, runs at medium thinking.</li>
+      <li><b>Why it fails.</b> A few centimetres per decision need dozens of decisions per task: 586 of Opus's 640 episodes used up the 985
+      steps, and in 31% the arm stayed blocked for five or more units in a row, its setpoint pushing against a cabinet or the table. Gemini does
+      best: 84% of its episodes get past the first subtask and 20% get blocked.</li>
+    </ul>
+  </details>
+</section>
+
+<section id="details">
+  <h2>Details</h2>
+  <details><summary>Benchmarks and held-out scenes</summary>
+    <p>All three benchmarks extend LIBERO: a Franka Panda arm in MuJoCo performs language-specified tabletop tasks in four suites (Spatial,
+    Object, Goal, Long). The agent receives the instruction, RGB-D frames from the overview and wrist cameras (512×512) with their
+    calibration, the robot's proprioception, and a small robot interface (observe, Cartesian moves, gripper, wait). It never sees the
+    simulator state. A run succeeds under LIBERO's protocol: the goal holds at some step within the suite's step budget (220, 280, 300 and
+    520 steps at 20&nbsp;Hz).</p>
+    <ul>
+      <li><b>LIBERO-PRO</b> swaps the objects' positions, asks a different task in the same scene, rewords the instruction, or changes the
+      objects' appearance.</li>
+      <li><b>LIBERO-Plus</b> perturbs object layout, camera viewpoint, robot initial state, language, lighting, background texture and sensor noise, at five levels.</li>
+      <li><b>LIBERO-MAX</b> changes the scene during execution, for example when the gripper comes near the target; its Lite track has 800
+      cases with eight event types.</li>
+    </ul>
+    <p>Held-out sets, written by a script from metadata before any method ran on them, with no scene in common with development:
+    LIBERO-MAX 200 (two disjoint samples of 100 Lite cases, each stratified over the eight event types); LIBERO-PRO 160 (four suites ×
+    {reworded, objects changed} × 10 tasks, plus four suites × {swapped, task changed} × 10 tasks from a new initial state); LIBERO-Plus 280
+    (four suites × seven factors × five easy and five hard scenes, no task shared with development).</p>
+  </details>
+  <details><summary>Settings and cost</summary>
+    <ul>
+      <li><b>Direct</b>: one program written from the first frames (20 minutes for the agent).</li>
+      <li><b>WorldRSI</b>: stage 1, 40 minutes in the agent's own world with no access to the real scene; stage 2, 30 minutes for a new
+      live session with only the harness and the skills.</li>
+      <li><b>WorldRSI-Meta</b>: as WorldRSI, with stage 1 starting from the meta harness.</li>
+      <li><b>Meta harness.</b> Evolved first in twelve agent-built worlds of development scenes, then on live episodes of 24 development
+      scenes; the version used was selected on 32 further development scenes the proposer never saw (29 of 32, against 23 for its starting point).</li>
+      <li><b>Cost per scene</b> (median time, mean API cost): Direct 1.2 minutes and $0.29; WorldRSI 8.3 minutes and $1.58; WorldRSI-Meta
+      8.2 minutes and $1.75.</li>
+    </ul>
+  </details>
+  <h3>Worlds the agent built on LIBERO</h3>
+  <figure class="wide"><img src="assets/img/libero/opus_pro_long_task_t6.jpg" alt="Real scene, the agent's world, and their difference: a red mug, a plate and a pudding box.">
+    <figcaption>Real scene · the agent's world · difference (LIBERO-PRO, task changed: "put the red mug on the plate and put the chocolate pudding to the right of the plate").</figcaption></figure>
+  <figure class="wide"><img src="assets/img/libero/gemini_pro_long_swap_t2.jpg" alt="Real scene, the agent's world, and their difference: a stove and a moka pot.">
+    <figcaption>Real scene · the agent's world · difference (LIBERO-PRO, positions swapped: "turn on the stove and put the moka pot on it").</figcaption></figure>
+</section>
+
+<section id="cite">
+  <h2>Citation</h2>
+<pre>@misc{zhang2026worldrsi,
+  title  = {WorldRSI: Robot Agents That Build Worlds to Improve Themselves},
+  author = {Zhang, Yunbei and Li, Yijiang and Wang, Janet and Hamm, Jihun and Vasconcelos, Nuno},
+  year   = {2026},
+  url    = {https://worldrsi.github.io}
+}</pre>
+</section>
+
+</main>
+<footer class="wrap">WorldRSI · Tulane University and University of California, San Diego</footer>
 </body>
 </html>
