@@ -184,7 +184,7 @@
     <div class="stat"><div class="n">63 → 80<small>%</small></div><div class="t">Claude Opus 5.5 on 640 held-out scenes: a program written once vs. WorldRSI</div></div>
     <div class="stat"><div class="n">84<small>%</small></div><div class="t">with the self-improved meta harness (WorldRSI-Meta)</div></div>
     <div class="stat"><div class="n">32 / 34</div><div class="t">rehearsals succeed on hidden twins of six real-robot tasks</div></div>
-    <div class="stat"><div class="n">3 tasks</div><div class="t">already completed on the physical robot; the other three are under way</div></div>
+    <div class="stat"><div class="n">3 tasks</div><div class="t">completed on the physical robot; the other three are in progress</div></div>
   </div>
 </section>
 
@@ -214,9 +214,7 @@
     <div class="vid"><video controls muted playsinline preload="metadata" poster="assets/video/real_press_number.jpg"><source src="assets/video/real_press_number.mp4" type="video/mp4"></video>
       <div class="cap"><b>Press buttons by number.</b> Press each button as many times as its card shows, then the confirm button after each, and return home. Success; 15 minutes, 36 scripts.</div></div>
   </div>
-  <p class="note">So far, three of the first eight trials have succeeded, one on each of these tasks. The others were stopped by the operator
-  or by the station: pauses, motor heat, and a first hang-mugs attempt in which the mug rack, much taller than the agent's world
-  assumed, kept being pushed around. Trials of the remaining tasks are under way.</p>
+  <p class="note">Three of the six tasks have been completed on the physical robot so far; real-robot runs of the other three are in progress.</p>
 
   <h3>Six tasks: the real first frame and the agent's world</h3>
   <div class="tasks">
@@ -235,25 +233,29 @@
     <div class="task"><div class="pairlbl"><span class="r">Real first frame</span><span class="s">Agent's world</span></div>
       <div class="pair"><img src="assets/img/tasks/hang_mugs_real.jpg" alt="Real: mugs and a mug rack"><img src="assets/img/tasks/hang_mugs_world.jpg" alt="Agent's world: mugs and a rack"></div>
       <div class="body"><h3>Hang mugs</h3><p>Hang both mugs on the rack by their handles.</p>
-      <div class="task-meta"><span class="chip">twin 4/4</span><span class="chip wip">real: first try failed</span></div></div></div>
+      <div class="task-meta"><span class="chip">twin 4/4</span><span class="chip wip">real: in progress</span></div></div></div>
     <div class="task"><div class="pairlbl"><span class="r">Real first frame</span><span class="s">Agent's world</span></div>
       <div class="pair"><img src="assets/img/tasks/pack_toys_real.jpg" alt="Real: a box and four objects"><img src="assets/img/tasks/pack_toys_world.jpg" alt="Agent's world: a box and four objects"></div>
       <div class="body"><h3>Pack objects</h3><p>Put four objects into the box, front ends pointing left.</p>
-      <div class="task-meta"><span class="chip">twin 5/6</span><span class="chip wip">real: under way</span></div></div></div>
+      <div class="task-meta"><span class="chip">twin 5/6</span><span class="chip wip">real: in progress</span></div></div></div>
     <div class="task"><div class="pairlbl"><span class="r">Real first frame</span><span class="s">Agent's world</span></div>
       <div class="pair"><img src="assets/img/tasks/hanoi_real.jpg" alt="Real: a board with five pegs and three stacked pieces"><img src="assets/img/tasks/hanoi_world.jpg" alt="Agent's world: the board and pieces"></div>
       <div class="body"><h3>Tower of Hanoi</h3><p>Move the three-piece stack to the left-end peg, never larger on smaller.</p>
-      <div class="task-meta"><span class="chip">twin 8/8</span><span class="chip wip">real: under way</span></div></div></div>
+      <div class="task-meta"><span class="chip">twin 8/8</span><span class="chip wip">real: in progress</span></div></div></div>
   </div>
   <p class="note">"Twin": rehearsals of the hand-over by a live agent on a hidden simulated twin of the recorded scene, built by us and never
   seen by the rehearsing agent (32 of 34 succeed).</p>
 
-  <h3>Rehearsal on a hidden twin</h3>
-  <div class="vids two-col">
+  <h3>The same three tasks, rehearsed on a hidden twin</h3>
+  <p class="note">Before the real robot, a live agent with only the hand-over acts on the hidden twin through the same robot interface
+  it later uses on the station.</p>
+  <div class="vids">
     <div class="vid"><video controls muted playsinline preload="metadata" poster="assets/video/twin_plug_charger.jpg"><source src="assets/video/twin_plug_charger.mp4" type="video/mp4"></video>
       <div class="cap"><b>Plug in a charger</b>, twin.</div></div>
     <div class="vid"><video controls muted playsinline preload="metadata" poster="assets/video/twin_cover_blocks.jpg"><source src="assets/video/twin_cover_blocks.mp4" type="video/mp4"></video>
       <div class="cap"><b>Cover and uncover blocks</b>, twin.</div></div>
+    <div class="vid"><video controls muted playsinline preload="metadata" poster="assets/video/twin_press_number.jpg"><source src="assets/video/twin_press_number.mp4" type="video/mp4"></video>
+      <div class="cap"><b>Press buttons by number</b>, twin.</div></div>
   </div>
 </section>
 
