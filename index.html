@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>WorldRSI | Robot Agents That Build Worlds to Improve Themselves</title>
-<meta name="description" content="WorldRSI: from the first frames of a new task, a robot agent builds its own simulation of the scene, rehearses there, and returns to reality with a harness and skills. Results on 640 held-out LIBERO-MAX, LIBERO-PRO and LIBERO-Plus scenes and on a physical bimanual robot.">
+<meta name="description" content="WorldRSI: from the first frames of a new task, a robot agent builds its own simulation of the scene, rehearses there, and returns to reality with a harness it improved in that world. Results on 640 held-out LIBERO-MAX, LIBERO-PRO and LIBERO-Plus scenes and on a physical bimanual robot.">
 <link rel="canonical" href="https://worldrsi.github.io/">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="WorldRSI: Robot Agents That Build Worlds to Improve Themselves">
@@ -157,12 +157,12 @@
     <figure class="r"><p class="label r">Real: first frame</p><img src="assets/img/teaser_real.jpg" alt="The real bimanual station at the start of the task: a power strip and a charger on the table."></figure>
     <div class="arrow"><b>→</b>build</div>
     <figure class="s"><p class="label s">Sim: the agent's own world</p><img src="assets/img/teaser_world.jpg" alt="The agent's own simulation of the same scene, rendered from the same camera."></figure>
-    <div class="arrow"><b>→</b>harness<br>+ skills</div>
+    <div class="arrow"><b>→</b>harness</div>
     <figure class="r"><p class="label r">Real: act live</p><img src="assets/img/teaser_live.jpg" alt="On the physical robot, the live agent plugs the charger into the power strip (overview and wrist cameras)."></figure>
   </div>
-  <div class="meta-bar"><b>Meta harness</b> (WorldRSI-Meta): evolved beforehand from the records of past episodes, then adapted in each new world</div>
-  <p class="caption">From the first real frame, the agent builds its own world of the scene, rehearses the task there, and hands a harness and
-  skills, not a policy, to a live agent on the real robot. Shown: plugging a charger into a power strip on a physical bimanual robot.</p>
+  <div class="meta-bar"><b>Meta harness</b> (WorldRSI-Meta): evolved beforehand on development tasks, frozen, and used as the starting harness of each rehearsal</div>
+  <p class="caption">From the first real frame, the agent builds its own world of the scene, improves a harness there over repeated rehearsals, and
+  hands it, not a policy, to a live agent on the real robot. Shown: plugging a charger into a power strip on a physical bimanual robot.</p>
 </header>
 
 <nav class="toc"><div class="wrap">
@@ -178,11 +178,12 @@
   once from the first camera frames breaks when an object is not where it seemed, a grasp slips, or the scene changes during
   execution.</p>
   <p>WorldRSI gives the agent a safe place to try things before acting. At the start of every new task the agent builds its own
-  world of the scene, rehearses in it, and returns to reality with knowledge rather than a fixed policy. Across tasks, the way it
-  rehearses improves itself: a meta harness, evolved from the records of past episodes, gives every new rehearsal a better start.</p>
+  world of the scene, rehearses in it, and returns to reality with knowledge rather than a fixed policy: a harness it improved round
+  after round in its own world. The harness a rehearsal starts from can itself be evolved beforehand on development tasks into a
+  meta harness.</p>
   <div class="stats">
     <div class="stat"><div class="n">63 → 80<small>%</small></div><div class="t">Claude Opus 5.5 on 640 held-out scenes: a program written once vs. WorldRSI</div></div>
-    <div class="stat"><div class="n">84<small>%</small></div><div class="t">with the self-improved meta harness (WorldRSI-Meta)</div></div>
+    <div class="stat"><div class="n">84<small>%</small></div><div class="t">starting from the meta harness (WorldRSI-Meta)</div></div>
     <div class="stat"><div class="n">32 / 34</div><div class="t">rehearsals succeed on hidden twins of six real-robot tasks</div></div>
     <div class="stat"><div class="n">3 tasks</div><div class="t">completed on the physical robot; the other three are in progress</div></div>
   </div>
@@ -192,9 +193,9 @@
   <h2>Method</h2>
   <div class="steps">
     <div class="step real"><span class="tag">Real → Sim</span><h3>Build a world</h3><p>From the instruction and the first frames only, the agent reconstructs the scene as an executable physics simulation: objects, fixtures, the calibrated robot, and a check of what success means. It renders its world from the robot's cameras and corrects it until it agrees with the real frames.</p></div>
-    <div class="step sim"><span class="tag">In Sim</span><h3>Rehearse</h3><p>It practices the task in its world and in shifted and changing copies of it (objects displaced, the target moved during the approach, light or sensor noise). It writes down what it learned as a harness (phases, checks, repairs) and a library of skills it tested.</p></div>
-    <div class="step real"><span class="tag">Sim → Real</span><h3>Act live</h3><p>A new agent session acts on the real scene with only the harness and the skills: one short script at a time, looking at the cameras after each, so it can re-measure and recover. The world shapes how the agent acts; it need not match reality exactly.</p></div>
-    <div class="step rsi"><span class="tag">RSI</span><h3>Improve the harness</h3><p>A proposer agent reads the records of earlier episodes and writes a new version of the harness; another model removes anything tied to one scene; a version is kept only if it does better on scenes it was not built from.</p></div>
+    <div class="step sim"><span class="tag">In Sim · RSI</span><h3>Rehearse and improve</h3><p>It practices the task in its world and in shifted and changing copies of it (objects displaced, the target moved during the approach, light or sensor noise). It writes what it learned into a harness (phases, checks, repairs, and the skills they call), runs it in its world, finds where it fails and revises it, round after round.</p></div>
+    <div class="step real"><span class="tag">Sim → Real</span><h3>Act live</h3><p>A new agent session acts on the real scene with only the harness: one short script at a time, looking at the cameras after each, so it can re-measure and recover where the scene differs from its world, which need not match reality exactly.</p></div>
+    <div class="step rsi"><span class="tag">Across tasks</span><h3>Meta harness</h3><p>Before testing, on development tasks disjoint from the tests, a proposer agent reads the records of earlier episodes and writes new versions of the starting harness. Another model removes anything tied to one scene, and a version is kept only if it does better on development scenes it did not see. The chosen version is frozen, and test episodes never change it.</p></div>
   </div>
 </section>
 
@@ -204,7 +205,7 @@
   Six tasks follow recordings made on the station. Each world is built from a recording's first frames only.</p>
 
   <h3>Real episodes</h3>
-  <p class="note">The live agent is GPT-6 Astra, running at half speed with the harness and skills from its rehearsal. Each video shows the
+  <p class="note">The live agent is GPT-6 Astra, running at half speed with the harness from its rehearsal. Each video shows the
   three cameras, condensed from the full episode.</p>
   <div class="vids">
     <div class="vid"><video controls muted playsinline preload="metadata" poster="assets/video/real_plug_charger.jpg"><source src="assets/video/real_plug_charger.mp4" type="video/mp4"></video>
@@ -385,7 +386,7 @@
     <ul>
       <li><b>Direct</b>: one program written from the first frames (20 minutes for the agent).</li>
       <li><b>WorldRSI</b>: stage 1, 40 minutes in the agent's own world with no access to the real scene; stage 2, 30 minutes for a new
-      live session with only the harness and the skills.</li>
+      live session with only the harness.</li>
       <li><b>WorldRSI-Meta</b>: as WorldRSI, with stage 1 starting from the meta harness.</li>
       <li><b>Meta harness.</b> Evolved first in twelve agent-built worlds of development scenes, then on live episodes of 24 development
       scenes; the version used was selected on 32 further development scenes the proposer never saw (29 of 32, against 23 for its starting point).</li>
